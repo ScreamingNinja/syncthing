@@ -1,0 +1,35 @@
+# https://github.com/syncthing/syncthing/blob/main/README-Docker.md
+
+services:
+  syncthing:
+    image: syncthing/syncthing
+
+    # cap_add: # these may be required to add `chown` capabilities to the container
+    #   - cap_chown
+    #   - cap_fowner
+
+    security_opt:
+      - no-new-privileges:true
+
+    environment:
+      PUID: ${PUID?}
+      PGID: ${PGID?}
+      TZ: ${TZ:-US/Eastern}
+      PCAP: ${PCAP:-cap_chown,cap_fowner+ep}
+      GOMAXPROCS: ${GOMAXPROCS:-2}
+      STNODEFAULTFOLDER: true
+      # STGUIADDRESS: 127.0.0.1:8384 # this restricts webui access to localhost only
+
+    restart: unless-stopped
+
+    volumes:
+      - ${DATA_LOCATION?}:${DATA_LOCATION?}
+      - syncthing-config:/var/syncthing
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+
+    network_mode: host
+
+volumes:
+  syncthing-config:
+    external: true
